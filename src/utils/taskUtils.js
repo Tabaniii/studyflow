@@ -9,9 +9,9 @@ export const PRIORITY_LABEL = {
 }
 
 export const PRIORITY_STYLES = {
-  tinggi: 'bg-rose-100 text-rose-700 border-rose-200',
-  sedang: 'bg-amber-100 text-amber-700 border-amber-200',
-  rendah: 'bg-sky-100 text-sky-700 border-sky-200',
+  tinggi: 'badge-brutal',
+  sedang: 'badge-brutal',
+  rendah: 'badge-brutal',
 }
 
 export const STATUSES = ['belum_mulai', 'dikerjakan', 'dikumpul', 'menunggu_nilai']
@@ -24,10 +24,10 @@ export const STATUS_LABEL = {
 }
 
 export const STATUS_STYLES = {
-  belum_mulai: 'bg-slate-100 text-slate-700 border-slate-200',
-  dikerjakan: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  dikumpul: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  menunggu_nilai: 'bg-violet-100 text-violet-700 border-violet-200',
+  belum_mulai: 'badge-brutal',
+  dikerjakan: 'badge-brutal',
+  dikumpul: 'badge-brutal',
+  menunggu_nilai: 'badge-brutal',
 }
 
 export const ANNOUNCED_VIA = ['wa', 'classroom', 'lms', 'kelas', 'email', 'lainnya']
@@ -162,23 +162,23 @@ export function getUrgency(task) {
 export const URGENCY_CONFIG = {
   terlambat: {
     label: 'Terlambat',
-    badge: 'bg-red-100 text-red-700 border-red-200',
-    accent: 'border-l-red-500',
+    badge: 'badge-brutal badge-ink',
+    accent: '',
   },
   mendekati: {
     label: 'Mendekati Deadline',
-    badge: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-    accent: 'border-l-yellow-400',
+    badge: 'badge-brutal badge-yellow',
+    accent: '',
   },
   aman: {
     label: 'Aman',
-    badge: 'bg-green-100 text-green-700 border-green-200',
-    accent: 'border-l-green-500',
+    badge: 'badge-brutal badge-green',
+    accent: '',
   },
   selesai: {
     label: 'Selesai',
-    badge: 'bg-slate-200 text-slate-600 border-slate-300',
-    accent: 'border-l-slate-300',
+    badge: 'badge-brutal badge-green',
+    accent: '',
   },
 }
 

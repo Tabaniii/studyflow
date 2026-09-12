@@ -8,21 +8,21 @@ export default function RitualChecklist({ task, onToggle }) {
   const progress = ritualProgress(task)
 
   return (
-    <div className="mt-3 rounded-xl border border-orange-200 bg-orange-50 p-3">
-      <p className="text-xs font-semibold text-orange-900">
+    <div className="brutal-border brutal-radius-md mt-3 w-full min-w-0 bg-brutal-orange p-3">
+      <p className="caption-brutal break-words">
         Ritual kumpul · {formatDeadlineLabel(task)} · {progress.done}/{progress.total}
       </p>
-      <ul className="mt-2 space-y-1.5">
+      <ul className="mt-2 space-y-2">
         {items.map((item) => (
           <li key={item.key}>
-            <label className="flex cursor-pointer items-start gap-2 text-sm text-orange-950">
+            <label className="flex cursor-pointer items-start gap-2 font-bold">
               <input
                 type="checkbox"
                 checked={Boolean(checks[item.key])}
                 onChange={(event) => onToggle(task, item.key, event.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-orange-600"
+                className="mt-1 h-5 w-5 accent-[var(--ink)]"
               />
-              <span className={checks[item.key] ? 'text-orange-800/70 line-through' : ''}>
+              <span className={checks[item.key] ? 'break-words line-through' : 'break-words'}>
                 {item.label}
               </span>
             </label>
@@ -42,10 +42,13 @@ export function RitualBanner({ tasks, onFocus }) {
     <button
       type="button"
       onClick={() => onFocus(first)}
-      className="w-full rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-left text-sm text-orange-950 transition hover:bg-orange-100"
+      className="card-cta brutal-press w-full px-4 py-4 text-left"
     >
-      <span className="font-semibold">Ritual kumpul:</span> {due.length} tugas deadline ≤ 2 jam.
-      Cek PDF, nama file, dan tempat kumpul sebelum kelewat.
+      <span className="caption-brutal">Ritual kumpul</span>
+      <p className="mt-1 text-[clamp(20px,2.4vw,28px)] font-extrabold leading-tight">
+        {due.length} tugas deadline ≤ 2 jam
+      </p>
+      <p className="mt-1 font-bold">Cek PDF, nama file, dan tempat kumpul sebelum kelewat.</p>
     </button>
   )
 }

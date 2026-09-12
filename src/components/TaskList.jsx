@@ -11,9 +11,9 @@ export default function TaskList({
 }) {
   if (tasks.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white/60 p-10 text-center">
-        <p className="text-lg font-semibold text-slate-600">Tidak ada tugas</p>
-        <p className="mt-1 text-sm text-slate-400">
+      <div className="card-brutal p-10 text-center">
+        <p className="font-display text-[clamp(24px,3vw,40px)]">Tidak ada tugas</p>
+        <p className="mt-2 font-bold">
           Tambahkan tugas baru atau ubah filter untuk melihat tugas lainnya.
         </p>
       </div>
@@ -21,7 +21,7 @@ export default function TaskList({
   }
 
   return (
-    <ul className="space-y-3">
+    <ul className="space-y-4 pb-2 pr-2">
       {tasks.map((task) => (
         <TaskItem
           key={task.id}

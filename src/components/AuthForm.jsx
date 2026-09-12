@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import PasswordField from './PasswordField'
+import { authRedirectUrl, translateAuthError } from '../utils/auth'
 
 export default function AuthForm() {
   const [mode, setMode] = useState('login')
-  const [form, setForm] = useState({ email: '', password: '', studyTime: '19:00' })
+  const [form, setForm] = useState({ email: '', password: '', confirmPassword: '' })
   const [error, setError] = useState(null)
   const [info, setInfo] = useState(null)
   const [loading, setLoading] = useState(false)
 
   const isRegister = mode === 'register'
+  const isForgot = mode === 'forgot'
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -28,16 +31,34 @@ export default function AuthForm() {
     setError(null)
     setInfo(null)
 
+    if (isForgot) {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(form.email, {
+        redirectTo: authRedirectUrl(),
+      })
+      if (resetError) {
+        setError(translateAuthError(resetError.message))
+      } else {
+        setInfo('Kalau email itu terdaftar, link reset sudah dikirim. Cek inbox dan folder spam.')
+      }
+      setLoading(false)
+      return
+    }
+
     if (isRegister) {
       if (form.password.length < 6) {
         setError('Password minimal 6 karakter')
         setLoading(false)
         return
       }
+      if (form.password !== form.confirmPassword) {
+        setError('Konfirmasi password tidak sama')
+        setLoading(false)
+        return
+      }
       const { error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { data: { study_time: form.studyTime } },
+        options: { emailRedirectTo: authRedirectUrl() },
       })
 
       if (signUpError) {
@@ -45,6 +66,7 @@ export default function AuthForm() {
       } else {
         setInfo('Pendaftaran berhasil! Cek email kamu untuk konfirmasi, lalu masuk.')
         setMode('login')
+        setForm((prev) => ({ ...prev, confirmPassword: '' }))
       }
     } else {
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -60,37 +82,42 @@ export default function AuthForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-600 to-violet-700 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
-        <h1 className="text-2xl font-bold text-slate-800">StudyFlow</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Catat deadline lengkap dengan konteks: diumumkan di mana, kumpul ke mana, syaratnya apa.
+    <div className="bg-brutal-grid flex min-h-screen items-center justify-center p-4 sm:p-6">
+      <div className="card-brutal card-brutal-lg relative w-full max-w-md p-5 sm:p-8">
+        <p className="brutal-scribble mb-3" aria-hidden="true" />
+        <h1 className="font-display heading-underline text-[clamp(32px,8vw,48px)]">StudyFlow</h1>
+        <p className="mt-4 text-ink">
+          {isForgot
+            ? 'Masukkan email akun kamu. Kami kirim link untuk ganti password.'
+            : 'Catat deadline lengkap dengan konteks: diumumkan di mana, kumpul ke mana, syaratnya apa.'}
         </p>
 
-        <div className="mt-6 grid grid-cols-2 rounded-lg border border-slate-200 bg-slate-50 p-1">
-          <button
-            type="button"
-            onClick={() => switchMode('login')}
-            className={`rounded-md py-1.5 text-sm font-medium transition ${
-              !isRegister ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            Masuk
-          </button>
-          <button
-            type="button"
-            onClick={() => switchMode('register')}
-            className={`rounded-md py-1.5 text-sm font-medium transition ${
-              isRegister ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            Daftar
-          </button>
-        </div>
+        {!isForgot && (
+          <div className="mt-6 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => switchMode('login')}
+              className={`btn-brutal btn-brutal-sm ${!isRegister ? 'btn-brutal-ink' : ''}`}
+            >
+              Masuk
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode('register')}
+              className={`btn-brutal btn-brutal-sm ${isRegister ? 'btn-brutal-ink' : ''}`}
+            >
+              Daftar
+            </button>
+          </div>
+        )}
+
+        {isForgot && (
+          <p className="caption-brutal mt-6">Reset password</p>
+        )}
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4" noValidate>
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="email" className="caption-brutal mb-2 block">
               Email
             </label>
             <input
@@ -98,78 +125,80 @@ export default function AuthForm() {
               name="email"
               type="email"
               required
+              autoComplete="email"
               value={form.email}
               onChange={handleChange}
               placeholder="nama@email.com"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
+              className="input-brutal"
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
-              Password
-            </label>
-            <input
+          {!isForgot && (
+            <PasswordField
               id="password"
               name="password"
-              type="password"
-              required
+              label="Password"
               value={form.password}
               onChange={handleChange}
               placeholder={isRegister ? 'Minimal 6 karakter' : 'Password kamu'}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
+              autoComplete={isRegister ? 'new-password' : 'current-password'}
             />
-          </div>
+          )}
 
           {isRegister && (
-            <div>
-              <label htmlFor="studyTime" className="mb-1 block text-sm font-medium text-slate-700">
-                Jam Belajar
-              </label>
-              <input
-                id="studyTime"
-                name="studyTime"
-                type="time"
-                required
-                value={form.studyTime}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
-              />
-              <p className="mt-1 text-xs text-slate-400">
-                Pengingat belajar harian di jam ini, plus notifikasi tugas yang sudah darurat.
-              </p>
-            </div>
+            <PasswordField
+              id="confirmPassword"
+              name="confirmPassword"
+              label="Konfirmasi password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              placeholder="Ulangi password"
+              autoComplete="new-password"
+            />
           )}
 
           {error && (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p className="brutal-border brutal-radius-sm bg-brutal-orange px-3 py-2 font-bold text-ink">
               {error}
             </p>
           )}
           {info && (
-            <p className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+            <p className="brutal-border brutal-radius-sm bg-brutal-green px-3 py-2 font-bold text-ink">
               {info}
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
-          >
-            {loading ? 'Memproses…' : isRegister ? 'Daftar Sekarang' : 'Masuk'}
+          <button type="submit" disabled={loading} className="btn-brutal btn-brutal-primary w-full">
+            {loading
+              ? 'Memproses…'
+              : isForgot
+                ? 'Kirim link reset'
+                : isRegister
+                  ? 'Daftar Sekarang'
+                  : 'Masuk'}
           </button>
         </form>
+
+        {!isRegister && !isForgot && (
+          <button
+            type="button"
+            onClick={() => switchMode('forgot')}
+            className="caption-brutal heading-underline mt-4"
+          >
+            Lupa password?
+          </button>
+        )}
+
+        {isForgot && (
+          <button
+            type="button"
+            onClick={() => switchMode('login')}
+            className="caption-brutal heading-underline mt-4"
+          >
+            Kembali masuk
+          </button>
+        )}
       </div>
     </div>
   )
-}
-
-function translateAuthError(message) {
-  if (message.includes('Invalid login credentials')) return 'Email atau password salah'
-  if (message.includes('User already registered')) return 'Email sudah terdaftar, silakan masuk'
-  if (message.includes('Email not confirmed'))
-    return 'Email belum dikonfirmasi. Cek inbox email kamu'
-  if (message.includes('Unable to validate email')) return 'Format email tidak valid'
-  return message
 }

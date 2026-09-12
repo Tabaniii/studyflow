@@ -3,7 +3,6 @@ import {
   PRIORITY_LABEL,
   PRIORITY_STYLES,
   STATUS_LABEL,
-  STATUS_STYLES,
   STATUSES,
   RECURRENCE_LABEL,
   TASK_TYPE_LABEL,
@@ -39,17 +38,13 @@ export default function TaskItem({
   const status = task.status || (task.is_done ? 'dikumpul' : 'belum_mulai')
 
   return (
-    <li
-      className={`rounded-xl border border-slate-200 border-l-4 bg-white p-4 shadow-sm transition ${config.accent} ${
-        urgency === 'selesai' ? 'opacity-80' : ''
-      }`}
-    >
-      <div className="flex items-start gap-3">
+    <li className="card-brutal min-w-0 p-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
         <select
           value={status}
           onChange={(event) => onStatusChange(task, event.target.value)}
           aria-label={`Status ${task.title}`}
-          className={`mt-0.5 w-[10.5rem] shrink-0 rounded-lg border px-2 py-1 text-[11px] font-semibold outline-none focus:ring-2 focus:ring-indigo-500 ${STATUS_STYLES[status]}`}
+          className="input-brutal caption-brutal order-2 w-full py-2 lg:order-1 lg:!w-52 lg:flex-none"
         >
           {STATUSES.map((value) => (
             <option key={value} value={value}>
@@ -58,40 +53,30 @@ export default function TaskItem({
           ))}
         </select>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold text-slate-800">{task.title}</h3>
-            {emergency && (
-              <span className="rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700">
-                Darurat 48 jam
-              </span>
-            )}
-            <span
-              className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${config.badge}`}
-            >
-              {config.label}
-            </span>
-            <span
-              className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${PRIORITY_STYLES[priority]}`}
-            >
+        <div className="order-1 min-w-0 flex-1 lg:order-2">
+          <h3 className="text-xl font-extrabold leading-tight break-words">{task.title}</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {emergency && <span className="badge-brutal badge-orange">Darurat 48 jam</span>}
+            <span className={config.badge}>{config.label}</span>
+            <span className={PRIORITY_STYLES[priority]}>
               Prioritas {PRIORITY_LABEL[priority].toLowerCase()}
             </span>
           </div>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-2 font-bold break-words">
             {task.course} · {formatDeadlineLabel(task)}
             {` (${formatDate(task.deadline)} ${formatTime(task.deadline_time)})`}
           </p>
 
-          <p className="mt-1 text-xs text-slate-500">{contextLine(task)}</p>
+          <p className="mt-1 font-medium break-words">{contextLine(task)}</p>
 
           {task.description && (
-            <p className="mt-2 line-clamp-2 text-sm text-slate-600">{task.description}</p>
+            <p className="mt-2 line-clamp-2 break-words">{task.description}</p>
           )}
 
-          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm font-bold">
             {task.task_type === 'kelompok' && (
-              <span>
+              <span className="break-words">
                 {TASK_TYPE_LABEL.kelompok}
                 {members.length > 0 ? `: ${members.join(', ')}` : ''}
                 {task.pic_name ? ` · PIC ${task.pic_name}` : ''}
@@ -101,7 +86,7 @@ export default function TaskItem({
               <span>{RECURRENCE_LABEL[task.recurrence]}</span>
             )}
             {budget.estimate != null && (
-              <span className={budget.overshoot ? 'font-semibold text-red-600' : ''}>
+              <span className={budget.overshoot ? 'badge-brutal badge-orange' : ''}>
                 Estimasi {formatDuration(budget.estimate)}
                 {urgency !== 'selesai' && budget.remaining >= 0
                   ? ` · sisa ${formatDuration(budget.remaining)}`
@@ -114,7 +99,7 @@ export default function TaskItem({
                 href={task.source_link}
                 target="_blank"
                 rel="noreferrer"
-                className="font-medium text-indigo-600 hover:underline"
+                className="heading-underline font-extrabold"
               >
                 Buka sumber
               </a>
@@ -125,25 +110,25 @@ export default function TaskItem({
           <RitualChecklist task={task} onToggle={onRitualToggle} />
         </div>
 
-        <div className="flex shrink-0 flex-col gap-1">
+        <div className="order-3 grid grid-cols-3 gap-2 lg:flex lg:w-28 lg:flex-none lg:flex-col">
           <button
             onClick={() => onFocus(task)}
             aria-label={`Fokus ${task.title}`}
-            className="rounded-lg px-2 py-1 text-sm text-slate-500 transition hover:bg-indigo-50 hover:text-indigo-600"
+            className="btn-brutal btn-brutal-sm btn-brutal-yellow w-full"
           >
             Fokus
           </button>
           <button
             onClick={() => onEdit(task)}
             aria-label={`Edit ${task.title}`}
-            className="rounded-lg px-2 py-1 text-sm text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600"
+            className="btn-brutal btn-brutal-sm w-full"
           >
             Edit
           </button>
           <button
             onClick={() => onDelete(task)}
             aria-label={`Hapus ${task.title}`}
-            className="rounded-lg px-2 py-1 text-sm text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+            className="btn-brutal btn-brutal-sm btn-brutal-primary w-full"
           >
             Hapus
           </button>

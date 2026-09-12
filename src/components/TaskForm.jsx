@@ -127,18 +127,16 @@ export default function TaskForm({
   }
 
   const inputClass = (hasError) =>
-    `w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-indigo-500 ${
-      hasError ? 'border-red-400' : 'border-slate-300'
-    }`
+    `input-brutal ${hasError ? 'input-brutal-error' : ''}`
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-      <div className="flex max-h-[92vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-xl">
-        <div className="border-b border-slate-100 px-6 py-4">
-          <h2 className="text-lg font-bold text-slate-800">
+    <div className="overlay-brutal">
+      <div className="card-brutal card-brutal-lg flex max-h-[92vh] w-full max-w-2xl flex-col">
+        <div className="divider-brutal px-6 py-4">
+          <h2 className="font-display text-[clamp(24px,3vw,32px)]">
             {isEdit ? 'Edit Tugas' : 'Tambah Tugas Baru'}
           </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-2 font-bold">
             Simpan konteks lengkap supaya tidak perlu buka grup lagi saat ngerjain.
           </p>
         </div>
@@ -374,12 +372,12 @@ export default function TaskForm({
           </Section>
 
           <Section title="Lampiran instruksi">
-            <p className="text-xs text-slate-500">
+            <p className="font-bold">
               Simpan screenshot WA, foto papan tulis, atau PDF soal. Tidak diparse — cuma biar gampang dibuka lagi.
             </p>
             <AttachmentThumbs attachments={existingAttachments} onDelete={onDeleteAttachment} />
             {pendingFiles.length > 0 && (
-              <ul className="text-xs text-slate-600">
+              <ul className="font-bold">
                 {pendingFiles.map((file, index) => (
                   <li key={`${file.name}-${index}`}>Siap diunggah: {file.name}</li>
                 ))}
@@ -390,9 +388,9 @@ export default function TaskForm({
               accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
               multiple
               onChange={handleFiles}
-              className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-indigo-700"
+              className="input-file-brutal caption-brutal block w-full"
             />
-            {fileError && <p className="text-xs text-red-600">{fileError}</p>}
+            {fileError && <p className="mt-2 bg-brutal-orange px-2 py-1 font-bold">{fileError}</p>}
           </Section>
 
           <Section title="Pengulangan">
@@ -417,19 +415,11 @@ export default function TaskForm({
             </Field>
           </Section>
 
-          <div className="sticky bottom-0 -mx-6 mt-2 flex justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-            >
+          <div className="divider-brutal-top sticky bottom-0 -mx-6 mt-2 flex justify-end gap-2 bg-surface px-6 py-4">
+            <button type="button" onClick={onCancel} className="btn-brutal">
               Batal
             </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
-            >
+            <button type="submit" disabled={saving} className="btn-brutal btn-brutal-primary">
               {saving ? 'Menyimpan…' : isEdit ? 'Simpan Perubahan' : 'Tambah Tugas'}
             </button>
           </div>
@@ -442,7 +432,7 @@ export default function TaskForm({
 function Section({ title, children }) {
   return (
     <section className="mb-5 space-y-3">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-indigo-600">{title}</h3>
+      <h3 className="caption-brutal heading-underline">{title}</h3>
       {children}
     </section>
   )
@@ -451,12 +441,12 @@ function Section({ title, children }) {
 function Field({ label, htmlFor, error, hint, children }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-1 block text-sm font-medium text-slate-700">
+      <label htmlFor={htmlFor} className="caption-brutal mb-2 block">
         {label}
       </label>
       {children}
-      {hint && !error && <p className="mt-1 text-xs text-slate-400">{hint}</p>}
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {hint && !error && <p className="mt-1 font-medium">{hint}</p>}
+      {error && <p className="mt-1 bg-brutal-orange px-2 py-1 font-bold">{error}</p>}
     </div>
   )
 }

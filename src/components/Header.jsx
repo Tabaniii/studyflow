@@ -23,12 +23,22 @@ export default function Header({
   onEditStudyTime,
   onLogout,
 }) {
+  const studyTone =
+    session?.phase === 'active'
+      ? 'btn-brutal-yellow'
+      : session?.phase === 'missed' || permission === 'denied'
+        ? 'btn-brutal-primary'
+        : ''
+
   return (
-    <header className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-6">
+    <header className="bg-brutal-grid">
+      <div className="page-shell flex flex-wrap items-center justify-between gap-4 py-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">StudyFlow</h1>
-          <p className="mt-1 text-sm text-indigo-100">
+          <p className="brutal-scribble mb-2" aria-hidden="true" />
+          <h1 className="font-display heading-underline text-[clamp(32px,5vw,48px)] text-ink">
+            StudyFlow
+          </h1>
+          <p className="mt-2 text-ink">
             {userEmail} · konteks tugas, bukan sekadar deadline
           </p>
         </div>
@@ -38,28 +48,16 @@ export default function Header({
             <button
               onClick={onEditStudyTime}
               title="Atur jam belajar dan tes pengingat"
-              className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
-                session?.phase === 'active'
-                  ? 'border-white/70 bg-white text-indigo-700'
-                  : session?.phase === 'missed' || permission === 'denied'
-                    ? 'border-amber-200/70 bg-amber-400/30 text-amber-50 hover:bg-amber-400/40'
-                    : 'border-indigo-300/50 bg-indigo-500/40 text-indigo-50 hover:bg-indigo-400/50'
-              }`}
+              className={`btn-brutal btn-brutal-sm ${studyTone}`}
             >
               {studyChipLabel(studyTime, session, permission)}
             </button>
           )}
-          <button
-            onClick={onAddClick}
-            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-50"
-          >
+          <button onClick={onAddClick} className="btn-brutal btn-brutal-primary">
             + Tambah Tugas
           </button>
           <InstallPrompt />
-          <button
-            onClick={onLogout}
-            className="rounded-lg border border-indigo-300/50 px-3 py-2 text-xs font-medium text-indigo-100 transition hover:bg-indigo-500/40"
-          >
+          <button onClick={onLogout} className="btn-brutal btn-brutal-sm">
             Keluar
           </button>
         </div>

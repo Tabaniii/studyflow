@@ -1,25 +1,26 @@
 const CARDS = [
-  { key: 'aktif', filter: 'aktif', label: 'Tugas Aktif', style: 'bg-white text-slate-800 border-slate-200' },
-  { key: 'darurat', filter: 'darurat', label: 'Darurat 48 Jam', style: 'bg-orange-50 text-orange-800 border-orange-200' },
-  { key: 'mendekati', filter: 'mendekati', label: 'Mendekati Deadline', style: 'bg-yellow-50 text-yellow-800 border-yellow-200' },
-  { key: 'terlambat', filter: 'terlambat', label: 'Terlambat', style: 'bg-red-50 text-red-800 border-red-200' },
-  { key: 'selesai', filter: 'selesai', label: 'Sudah Dikumpul', style: 'bg-green-50 text-green-800 border-green-200' },
+  { key: 'aktif', filter: 'aktif', label: 'Tugas Aktif', fill: 'bg-surface text-ink', tile: 'bg-surface', mark: 'A' },
+  { key: 'darurat', filter: 'darurat', label: 'Darurat 48 Jam', fill: 'bg-brutal-orange text-ink', tile: 'bg-surface', mark: '!' },
+  { key: 'mendekati', filter: 'mendekati', label: 'Mendekati Deadline', fill: 'bg-brutal-yellow text-ink', tile: 'bg-surface', mark: '~' },
+  { key: 'terlambat', filter: 'terlambat', label: 'Terlambat', fill: 'bg-ink text-surface', tile: 'bg-brutal-orange text-ink', mark: 'X' },
+  { key: 'selesai', filter: 'selesai', label: 'Sudah Dikumpul', fill: 'bg-brutal-green text-ink', tile: 'bg-surface', mark: 'OK' },
 ]
 
 export default function DashboardStats({ stats, onFilterChange }) {
   return (
-    <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+    <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
       {CARDS.map((card) => (
         <button
           key={card.key}
           type="button"
           onClick={() => onFilterChange?.(card.filter)}
-          className={`rounded-xl border p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow ${card.style}`}
+          className={`brutal-border brutal-shadow brutal-radius-md brutal-press min-w-0 p-3 text-left sm:p-4 ${card.fill}`}
         >
-          <p className="text-3xl font-bold">{stats[card.key] ?? 0}</p>
-          <p className="mt-1 text-xs font-medium uppercase tracking-wide opacity-80">
-            {card.label}
+          <span className={`icon-tile mb-3 ${card.tile}`}>{card.mark}</span>
+          <p className="font-display text-[clamp(32px,5vw,48px)] leading-none">
+            {stats[card.key] ?? 0}
           </p>
+          <p className="caption-brutal mt-2">{card.label}</p>
         </button>
       ))}
     </section>

@@ -37,13 +37,13 @@ export default function AttachmentThumbs({ attachments = [], onDelete }) {
               href={url || '#'}
               target="_blank"
               rel="noreferrer"
-              className="block overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
+              className="brutal-border brutal-radius-sm block overflow-hidden bg-surface"
               title={item.file_name}
             >
               {isImage && url ? (
                 <img src={url} alt={item.file_name} className="h-16 w-16 object-cover" />
               ) : (
-                <span className="flex h-16 w-24 items-center justify-center px-2 text-center text-[10px] font-medium text-slate-600">
+                <span className="caption-brutal flex h-16 w-24 items-center justify-center px-2 text-center">
                   {item.file_name}
                 </span>
               )}
@@ -52,7 +52,7 @@ export default function AttachmentThumbs({ attachments = [], onDelete }) {
               <button
                 type="button"
                 onClick={() => onDelete(item)}
-                className="absolute -right-1 -top-1 rounded-full bg-white px-1.5 text-xs font-bold text-red-600 shadow"
+                className="btn-brutal btn-brutal-sm btn-brutal-primary absolute -right-2 -top-2 px-2 py-0"
                 aria-label={`Hapus ${item.file_name}`}
               >
                 ×

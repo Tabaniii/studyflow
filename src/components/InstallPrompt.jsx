@@ -48,15 +48,11 @@ export default function InstallPrompt() {
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={handleInstall}
-        className="rounded-lg border border-indigo-300/50 px-3 py-2 text-xs font-medium text-indigo-100 transition hover:bg-indigo-500/40"
-      >
+      <button type="button" onClick={handleInstall} className="btn-brutal btn-brutal-sm">
         Pasang di HP
       </button>
       {iosHint && !deferred && (
-        <span className="hidden max-w-[12rem] text-[10px] leading-tight text-indigo-100 sm:inline">
+        <span className="caption-brutal hidden max-w-[12rem] sm:inline">
           iPhone: Share → Add to Home Screen
         </span>
       )}

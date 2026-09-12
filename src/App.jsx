@@ -6,6 +6,7 @@ import FilterBar from './components/FilterBar'
 import TaskList from './components/TaskList'
 import TaskForm from './components/TaskForm'
 import AuthForm from './components/AuthForm'
+import ResetPasswordForm from './components/ResetPasswordForm'
 import StudyTimeForm from './components/StudyTimeForm'
 import StudySessionBanner from './components/StudySessionBanner'
 import TonightPlan from './components/TonightPlan'
@@ -61,6 +62,7 @@ export default function App() {
   const [studyTimeFormOpen, setStudyTimeFormOpen] = useState(false)
   const [sessionDismissed, setSessionDismissed] = useState(() => isSessionDismissedToday())
   const [focusSession, setFocusSession] = useState(() => readFocusSession())
+  const [passwordRecovery, setPasswordRecovery] = useState(false)
 
   useEffect(() => {
     if (!isSupabaseConfigured) return
@@ -72,9 +74,10 @@ export default function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession)
       setAuthLoading(false)
+      if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true)
     })
 
     return () => subscription.unsubscribe()
@@ -420,27 +423,27 @@ export default function App() {
 
   if (!isSupabaseConfigured) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-lg rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
-          <h1 className="text-lg font-bold">Supabase belum dikonfigurasi</h1>
+      <div className="bg-brutal-grid flex min-h-screen items-center justify-center p-4">
+        <div className="card-insight w-full max-w-lg p-6">
+          <h1 className="font-display text-[clamp(28px,4vw,40px)]">Supabase belum dikonfigurasi</h1>
           {supabaseConfigIssue && (
-            <p className="mt-3 rounded-lg border border-amber-300 bg-amber-100 px-3 py-2 text-sm font-medium">
+            <p className="brutal-border brutal-radius-sm mt-3 bg-brutal-orange px-3 py-2 font-bold">
               {supabaseConfigIssue}
             </p>
           )}
-          <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm">
+          <ol className="mt-4 list-decimal space-y-2 pl-5 font-bold">
             <li>
-              Salin <code className="rounded bg-amber-100 px-1">.env.example</code> menjadi{' '}
-              <code className="rounded bg-amber-100 px-1">.env</code>
+              Salin <code className="badge-brutal">.env.example</code> menjadi{' '}
+              <code className="badge-brutal">.env</code>
             </li>
             <li>
-              Isi <code className="rounded bg-amber-100 px-1">VITE_SUPABASE_URL</code> dan{' '}
-              <code className="rounded bg-amber-100 px-1">VITE_SUPABASE_ANON_KEY</code> dari
+              Isi <code className="badge-brutal">VITE_SUPABASE_URL</code> dan{' '}
+              <code className="badge-brutal">VITE_SUPABASE_ANON_KEY</code> dari
               dashboard Supabase
             </li>
             <li>
               Jalankan SQL di{' '}
-              <code className="rounded bg-amber-100 px-1">supabase/schema.sql</code> lewat SQL
+              <code className="badge-brutal">supabase/schema.sql</code> lewat SQL
               Editor Supabase
             </li>
             <li>Restart dev server</li>
@@ -452,8 +455,8 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-slate-400">Memuat sesi…</p>
+      <div className="bg-brutal-grid flex min-h-screen items-center justify-center">
+        <p className="caption-brutal">Memuat sesi…</p>
       </div>
     )
   }
@@ -462,8 +465,12 @@ export default function App() {
     return <AuthForm />
   }
 
+  if (passwordRecovery) {
+    return <ResetPasswordForm onDone={() => setPasswordRecovery(false)} />
+  }
+
   return (
-    <div className="min-h-screen">
+    <div className="bg-brutal-grid min-h-screen">
       <Header
         userEmail={session.user.email}
         studyTime={profile?.study_time}
@@ -474,7 +481,7 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      <main className="mx-auto max-w-5xl space-y-6 px-4 py-6">
+      <main className="page-shell space-y-8 py-8">
         <DashboardStats stats={stats} onFilterChange={setFilter} />
 
         <TonightPlan
@@ -502,10 +509,13 @@ export default function App() {
           <button
             type="button"
             onClick={() => setFilter('darurat')}
-            className="w-full rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-left text-sm text-orange-900 transition hover:bg-orange-100"
+            className="card-cta brutal-press w-full px-4 py-4 text-left"
           >
-            <span className="font-semibold">Mode darurat 48 jam:</span> {stats.darurat} tugas harus
-            selesai sebelum overshoot. Ketuk untuk fokus ke situ.
+            <span className="caption-brutal">Mode darurat 48 jam</span>
+            <p className="mt-1 text-[clamp(20px,2.4vw,28px)] font-extrabold leading-tight">
+              {stats.darurat} tugas harus selesai sebelum overshoot
+            </p>
+            <p className="mt-1 font-bold">Ketuk untuk fokus ke situ.</p>
           </button>
         )}
 
@@ -517,13 +527,13 @@ export default function App() {
         />
 
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="brutal-border brutal-radius-sm bg-brutal-orange px-4 py-3 font-bold">
             {error}
           </div>
         )}
 
         {loading ? (
-          <p className="py-10 text-center text-sm text-slate-400">Memuat tugas…</p>
+          <p className="caption-brutal py-10 text-center">Memuat tugas…</p>
         ) : (
           <TaskList
             tasks={visibleTasks}
