@@ -64,7 +64,7 @@ export default function AuthForm() {
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
         <h1 className="text-2xl font-bold text-slate-800">StudyFlow</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Semua tugas kuliahmu, terpantau dalam satu dashboard.
+          Catat deadline lengkap dengan konteks: diumumkan di mana, kumpul ke mana, syaratnya apa.
         </p>
 
         <div className="mt-6 grid grid-cols-2 rounded-lg border border-slate-200 bg-slate-50 p-1">
@@ -136,7 +136,7 @@ export default function AuthForm() {
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
               />
               <p className="mt-1 text-xs text-slate-400">
-                Kamu akan dapat notifikasi pengingat belajar setiap hari di jam ini.
+                Pengingat belajar harian di jam ini, plus notifikasi tugas yang sudah darurat.
               </p>
             </div>
           )}

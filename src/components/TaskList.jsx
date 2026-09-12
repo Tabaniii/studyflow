@@ -1,6 +1,14 @@
 import TaskItem from './TaskItem'
 
-export default function TaskList({ tasks, onToggleDone, onEdit, onDelete }) {
+export default function TaskList({
+  tasks,
+  onStatusChange,
+  onEdit,
+  onDelete,
+  onFocus,
+  onRitualToggle,
+  onDeleteAttachment,
+}) {
   if (tasks.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-slate-300 bg-white/60 p-10 text-center">
@@ -18,9 +26,12 @@ export default function TaskList({ tasks, onToggleDone, onEdit, onDelete }) {
         <TaskItem
           key={task.id}
           task={task}
-          onToggleDone={onToggleDone}
+          onStatusChange={onStatusChange}
           onEdit={onEdit}
           onDelete={onDelete}
+          onFocus={onFocus}
+          onRitualToggle={onRitualToggle}
+          onDeleteAttachment={onDeleteAttachment}
         />
       ))}
     </ul>
