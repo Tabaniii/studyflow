@@ -15,6 +15,7 @@ function studyChipLabel(studyTime, session, permission) {
 }
 
 export default function Header({
+  userName,
   userEmail,
   studyTime,
   session,
@@ -22,6 +23,7 @@ export default function Header({
   onAddClick,
   onEditStudyTime,
   onLogout,
+  onDeleteAccount,
 }) {
   const studyTone =
     session?.phase === 'active'
@@ -39,7 +41,7 @@ export default function Header({
             StudyFlow
           </h1>
           <p className="mt-2 text-ink">
-            {userEmail} · konteks tugas, bukan sekadar deadline
+            {userName || userEmail} · konteks tugas, bukan sekadar deadline
           </p>
         </div>
 
@@ -59,6 +61,13 @@ export default function Header({
           <InstallPrompt />
           <button onClick={onLogout} className="btn-brutal btn-brutal-sm">
             Keluar
+          </button>
+          <button
+            type="button"
+            onClick={onDeleteAccount}
+            className="btn-brutal btn-brutal-sm btn-brutal-primary"
+          >
+            Hapus akun
           </button>
         </div>
       </div>

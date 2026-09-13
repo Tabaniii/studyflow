@@ -1,8 +1,10 @@
--- StudyFlow schema v5: malam ini + ritual kumpul + lampiran instruksi
+-- StudyFlow schema v7: nama tampilan + login nama/email
 -- Jalankan SELURUH file ini sekaligus di Supabase Dashboard -> SQL Editor.
 -- AMAN DIULANG: tidak menghapus tabel/data. Kolom baru ditambah, data lama di-backfill.
 -- v3 -> v4: tugas selesai (is_done) diisi status 'dikumpul'.
 -- v4 -> v5: jam tidur, checklist ritual, tabel + bucket lampiran.
+-- v5 -> v6: RPC delete_own_account.
+-- v6 -> v7: profiles.name + RPC email_for_login.
 
 -- ============================================================
 -- Profil pengguna
@@ -14,8 +16,14 @@ create table if not exists public.profiles (
 );
 
 alter table public.profiles add column if not exists sleep_time time not null default '23:00';
+alter table public.profiles add column if not exists name text;
 
-grant select, insert, update on public.profiles to authenticated;
+drop index if exists profiles_name_lower_idx;
+create unique index profiles_name_lower_idx
+  on public.profiles (lower(name))
+  where name is not null and length(trim(name)) > 0;
+
+grant select, insert, update, delete on public.profiles to authenticated;
 
 alter table public.profiles enable row level security;
 
@@ -34,6 +42,11 @@ create policy "profiles: update own" on public.profiles
   for update to authenticated
   using (auth.uid() = id)
   with check (auth.uid() = id);
+
+drop policy if exists "profiles: delete own" on public.profiles;
+create policy "profiles: delete own" on public.profiles
+  for delete to authenticated
+  using (auth.uid() = id);
 
 -- ============================================================
 -- Tugas
@@ -144,12 +157,22 @@ returns trigger
 language plpgsql
 security definer set search_path = public
 as $$
+declare
+  new_name text := nullif(trim(coalesce(new.raw_user_meta_data ->> 'name', '')), '');
 begin
-  insert into public.profiles (id, study_time, sleep_time)
+  if new_name is not null and exists (
+    select 1 from public.profiles
+    where name is not null and lower(name) = lower(new_name)
+  ) then
+    raise exception 'Nama sudah dipakai';
+  end if;
+
+  insert into public.profiles (id, study_time, sleep_time, name)
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'study_time', '19:00')::time,
-    coalesce(new.raw_user_meta_data ->> 'sleep_time', '23:00')::time
+    coalesce(new.raw_user_meta_data ->> 'sleep_time', '23:00')::time,
+    new_name
   )
   on conflict (id) do nothing;
   return new;
@@ -229,5 +252,71 @@ using (
   bucket_id = 'task-attachments'
   and (storage.foldername(name))[1] = auth.uid()::text
 );
+
+-- ============================================================
+-- Hapus akun sendiri: storage + baris publik + auth.users
+-- Cascade: auth.users -> profiles, tasks, task_attachments
+-- ============================================================
+create or replace function public.delete_own_account()
+returns void
+language plpgsql
+security definer
+set search_path = public, storage, auth
+as $$
+declare
+  uid uuid := auth.uid();
+begin
+  if uid is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  delete from storage.objects
+  where bucket_id = 'task-attachments'
+    and name like uid::text || '/%';
+
+  delete from public.task_attachments where user_id = uid;
+  delete from public.tasks where user_id = uid;
+  delete from public.profiles where id = uid;
+  delete from auth.users where id = uid;
+end;
+$$;
+
+revoke all on function public.delete_own_account() from public;
+grant execute on function public.delete_own_account() to authenticated;
+
+-- ============================================================
+-- Login pakai nama ATAU email (dipanggil sebelum signIn)
+-- ============================================================
+create or replace function public.email_for_login(identifier text)
+returns text
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+declare
+  trimmed text := lower(trim(coalesce(identifier, '')));
+  found_email text;
+begin
+  if trimmed = '' then
+    return null;
+  end if;
+
+  if position('@' in trimmed) > 0 then
+    return trimmed;
+  end if;
+
+  select u.email into found_email
+  from public.profiles p
+  join auth.users u on u.id = p.id
+  where p.name is not null
+    and lower(trim(p.name)) = trimmed
+  limit 1;
+
+  return found_email;
+end;
+$$;
+
+revoke all on function public.email_for_login(text) from public;
+grant execute on function public.email_for_login(text) to anon, authenticated;
 
 notify pgrst, 'reload schema';

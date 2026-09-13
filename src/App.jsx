@@ -8,6 +8,7 @@ import TaskForm from './components/TaskForm'
 import AuthForm from './components/AuthForm'
 import ResetPasswordForm from './components/ResetPasswordForm'
 import StudyTimeForm from './components/StudyTimeForm'
+import DeleteAccountModal from './components/DeleteAccountModal'
 import StudySessionBanner from './components/StudySessionBanner'
 import TonightPlan from './components/TonightPlan'
 import { RitualBanner } from './components/RitualChecklist'
@@ -17,6 +18,7 @@ import {
   dismissStudySession,
   isSessionDismissedToday,
   rearmStudyReminder,
+  clearStudyflowLocalData,
 } from './utils/studyTime'
 import { getAvailableTonightHours, planTonight } from './utils/tonight'
 import {
@@ -60,6 +62,7 @@ export default function App() {
   const [editingTask, setEditingTask] = useState(null)
   const [formOpen, setFormOpen] = useState(false)
   const [studyTimeFormOpen, setStudyTimeFormOpen] = useState(false)
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false)
   const [sessionDismissed, setSessionDismissed] = useState(() => isSessionDismissedToday())
   const [focusSession, setFocusSession] = useState(() => readFocusSession())
   const [passwordRecovery, setPasswordRecovery] = useState(false)
@@ -128,7 +131,10 @@ export default function App() {
 
     const { data: created, error: insertError } = await supabase
       .from('profiles')
-      .insert({ id: userId })
+      .insert({
+        id: userId,
+        name: session?.user?.user_metadata?.name || null,
+      })
       .select()
       .single()
 
@@ -341,6 +347,19 @@ export default function App() {
     await supabase.auth.signOut()
   }
 
+  async function handleDeleteAccount() {
+    const { error: deleteError } = await supabase.rpc('delete_own_account')
+    if (deleteError) {
+      if (deleteError.message?.includes('Could not find the function')) {
+        throw new Error('Jalankan supabase/schema.sql terbaru di SQL Editor dulu (fungsi hapus akun belum ada).')
+      }
+      throw new Error(deleteError.message)
+    }
+    clearStudyflowLocalData()
+    await supabase.auth.signOut({ scope: 'local' })
+    setDeleteAccountOpen(false)
+  }
+
   function openAddForm() {
     setEditingTask(null)
     setFormOpen(true)
@@ -472,6 +491,7 @@ export default function App() {
   return (
     <div className="bg-brutal-grid min-h-screen">
       <Header
+        userName={profile?.name}
         userEmail={session.user.email}
         studyTime={profile?.study_time}
         session={reminder.session}
@@ -479,6 +499,7 @@ export default function App() {
         onAddClick={openAddForm}
         onEditStudyTime={() => setStudyTimeFormOpen(true)}
         onLogout={handleLogout}
+        onDeleteAccount={() => setDeleteAccountOpen(true)}
       />
 
       <main className="page-shell space-y-8 py-8">
@@ -566,6 +587,14 @@ export default function App() {
           onCancel={() => setStudyTimeFormOpen(false)}
           onTestReminder={reminder.sendTest}
           onRequestPermission={reminder.requestPermission}
+        />
+      )}
+
+      {deleteAccountOpen && (
+        <DeleteAccountModal
+          userEmail={session.user.email}
+          onConfirm={handleDeleteAccount}
+          onCancel={() => setDeleteAccountOpen(false)}
         />
       )}
 

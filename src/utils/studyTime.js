@@ -66,6 +66,13 @@ export function rearmStudyReminder() {
   localStorage.removeItem(SESSION_DISMISS_KEY)
 }
 
+export function clearStudyflowLocalData() {
+  localStorage.removeItem(LAST_STUDY_KEY)
+  localStorage.removeItem(LAST_URGENCY_KEY)
+  localStorage.removeItem(SESSION_DISMISS_KEY)
+  localStorage.removeItem('studyflow:focus-session')
+}
+
 export function notificationSupported() {
   return typeof window !== 'undefined' && 'Notification' in window
 }

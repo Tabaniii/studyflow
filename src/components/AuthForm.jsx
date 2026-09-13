@@ -1,11 +1,22 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import PasswordField from './PasswordField'
-import { authRedirectUrl, translateAuthError } from '../utils/auth'
+import {
+  authRedirectUrl,
+  normalizeDisplayName,
+  translateAuthError,
+  validateDisplayName,
+} from '../utils/auth'
 
 export default function AuthForm() {
   const [mode, setMode] = useState('login')
-  const [form, setForm] = useState({ email: '', password: '', confirmPassword: '' })
+  const [form, setForm] = useState({
+    identifier: '',
+    email: '',
+    name: '',
+    password: '',
+    confirmPassword: '',
+  })
   const [error, setError] = useState(null)
   const [info, setInfo] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -23,6 +34,23 @@ export default function AuthForm() {
     setMode(nextMode)
     setError(null)
     setInfo(null)
+  }
+
+  async function resolveEmail(identifier) {
+    const trimmed = identifier.trim()
+    if (!trimmed) return null
+    if (trimmed.includes('@')) return trimmed
+
+    const { data, error: lookupError } = await supabase.rpc('email_for_login', {
+      identifier: trimmed,
+    })
+    if (lookupError) {
+      if (lookupError.message?.includes('Could not find the function')) {
+        throw new Error('Jalankan supabase/schema.sql terbaru di SQL Editor dulu (fungsi login nama belum ada).')
+      }
+      throw lookupError
+    }
+    return data
   }
 
   async function handleSubmit(event) {
@@ -45,6 +73,13 @@ export default function AuthForm() {
     }
 
     if (isRegister) {
+      const name = normalizeDisplayName(form.name)
+      const nameError = validateDisplayName(name)
+      if (nameError) {
+        setError(nameError)
+        setLoading(false)
+        return
+      }
       if (form.password.length < 6) {
         setError('Password minimal 6 karakter')
         setLoading(false)
@@ -58,25 +93,37 @@ export default function AuthForm() {
       const { error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { emailRedirectTo: authRedirectUrl() },
+        options: {
+          emailRedirectTo: authRedirectUrl(),
+          data: { name },
+        },
       })
 
       if (signUpError) {
         setError(translateAuthError(signUpError.message))
       } else {
-        setInfo('Pendaftaran berhasil! Cek email kamu untuk konfirmasi, lalu masuk.')
+        setInfo('Pendaftaran berhasil! Cek email kamu untuk konfirmasi, lalu masuk pakai nama atau email.')
         setMode('login')
-        setForm((prev) => ({ ...prev, confirmPassword: '' }))
+        setForm((prev) => ({ ...prev, identifier: name, confirmPassword: '' }))
       }
-    } else {
+      setLoading(false)
+      return
+    }
+
+    try {
+      const email = await resolveEmail(form.identifier)
+      if (!email) {
+        setError('Nama atau email tidak ditemukan')
+        setLoading(false)
+        return
+      }
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: form.email,
+        email,
         password: form.password,
       })
-
-      if (signInError) {
-        setError(translateAuthError(signInError.message))
-      }
+      if (signInError) setError(translateAuthError(signInError.message))
+    } catch (loginError) {
+      setError(translateAuthError(loginError.message || String(loginError)))
     }
     setLoading(false)
   }
@@ -89,7 +136,9 @@ export default function AuthForm() {
         <p className="mt-4 text-ink">
           {isForgot
             ? 'Masukkan email akun kamu. Kami kirim link untuk ganti password.'
-            : 'Catat deadline lengkap dengan konteks: diumumkan di mana, kumpul ke mana, syaratnya apa.'}
+            : isRegister
+              ? 'Isi nama unik, email, dan password. Nanti bisa masuk pakai nama atau email.'
+              : 'Masuk pakai nama atau email, plus password.'}
         </p>
 
         {!isForgot && (
@@ -116,22 +165,60 @@ export default function AuthForm() {
         )}
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4" noValidate>
-          <div>
-            <label htmlFor="email" className="caption-brutal mb-2 block">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="nama@email.com"
-              className="input-brutal"
-            />
-          </div>
+          {isRegister && (
+            <div>
+              <label htmlFor="name" className="caption-brutal mb-2 block">
+                Nama
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                autoComplete="nickname"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="cth: Budi"
+                className="input-brutal"
+              />
+            </div>
+          )}
+
+          {isForgot || isRegister ? (
+            <div>
+              <label htmlFor="email" className="caption-brutal mb-2 block">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="nama@email.com"
+                className="input-brutal"
+              />
+            </div>
+          ) : (
+            <div>
+              <label htmlFor="identifier" className="caption-brutal mb-2 block">
+                Nama atau email
+              </label>
+              <input
+                id="identifier"
+                name="identifier"
+                type="text"
+                required
+                autoComplete="username"
+                value={form.identifier}
+                onChange={handleChange}
+                placeholder="Budi atau nama@email.com"
+                className="input-brutal"
+              />
+            </div>
+          )}
 
           {!isForgot && (
             <PasswordField
