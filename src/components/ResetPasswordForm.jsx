@@ -39,7 +39,7 @@ export default function ResetPasswordForm({ onDone }) {
   }
 
   return (
-    <div className="bg-brutal-grid flex min-h-screen items-center justify-center p-4 sm:p-6">
+    <div className="bg-brutal-grid flex min-h-dvh items-center justify-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] sm:p-6">
       <div className="card-brutal card-brutal-lg w-full max-w-md p-5 sm:p-8">
         <p className="brutal-scribble mb-3" aria-hidden="true" />
         <h1 className="font-display heading-underline text-[clamp(32px,8vw,48px)]">Password baru</h1>

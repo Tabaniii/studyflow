@@ -8,7 +8,7 @@ const CARDS = [
 
 export default function DashboardStats({ stats, onFilterChange }) {
   return (
-    <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+    <section className="grid grid-cols-2 gap-3 overflow-visible pb-2 sm:grid-cols-3 sm:gap-4 sm:pb-0 lg:grid-cols-5">
       {CARDS.map((card, index) => (
         <button
           key={card.key}

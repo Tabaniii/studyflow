@@ -14,7 +14,7 @@ export default class ErrorBoundary extends Component {
     if (!this.state.error) return this.props.children
 
     return (
-      <div className="bg-brutal-grid flex min-h-screen items-center justify-center p-4">
+      <div className="bg-brutal-grid flex min-h-dvh items-center justify-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
         <div className="card-insight w-full max-w-lg p-6">
           <p className="caption-brutal">Layar macet</p>
           <h1 className="font-display mt-2 text-[clamp(28px,4vw,40px)]">Ada yang error</h1>

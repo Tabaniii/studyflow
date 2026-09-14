@@ -13,8 +13,8 @@ const FILTERS = [
 
 export default function FilterBar({ filter, onFilterChange, sort, onSortChange }) {
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div className="card-brutal flex flex-wrap gap-2 p-3">
+    <div className="flex flex-col gap-4 overflow-visible pb-2 lg:flex-row lg:items-center lg:justify-between lg:pb-0">
+      <div className="card-brutal flex flex-wrap gap-2 overflow-visible p-3">
         {FILTERS.map((item) => (
           <button
             key={item.value}

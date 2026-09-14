@@ -85,6 +85,9 @@ html {
   color-scheme: light;
   color-scheme: light only;
   background-color: #fdf6e9;
+  min-height: 100%;
+  min-height: 100lvh;
+  min-height: -webkit-fill-available;
 }
 
 html,
@@ -92,6 +95,8 @@ body,
 #root {
   min-height: 100%;
   min-height: 100dvh;
+  min-height: 100lvh;
+  min-height: -webkit-fill-available;
   background-color: #fdf6e9;
   color: #111111;
 }
@@ -104,6 +109,19 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* iOS WKWebView default-nya hitam. Isi home indicator supaya tidak jadi blok hitam. */
+body::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: env(safe-area-inset-bottom, 0px);
+  background: #fdf6e9;
+  pointer-events: none;
+  z-index: 1;
+}
+
 @media (prefers-color-scheme: dark) {
   html,
   body,
@@ -111,6 +129,10 @@ body {
     color-scheme: light only;
     background-color: #fdf6e9 !important;
     color: #111111 !important;
+  }
+
+  body::after {
+    background: #fdf6e9;
   }
 }
 
@@ -174,6 +196,7 @@ body {
   align-items: flex-start;
   justify-content: center;
   padding: 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   background: var(--ink);
   overflow: auto;
 }
@@ -243,6 +266,11 @@ body {
 
   .page-shell {
     padding-inline: 16px;
+  }
+
+  /* Jarak extra supaya kartu + shadow tidak ketutup home indicator */
+  main.page-shell {
+    padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
   }
 }
 

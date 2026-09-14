@@ -442,7 +442,7 @@ export default function App() {
 
   if (!isSupabaseConfigured) {
     return (
-      <div className="bg-brutal-grid flex min-h-screen items-center justify-center p-4">
+      <div className="bg-brutal-grid flex min-h-dvh items-center justify-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
         <div className="card-insight w-full max-w-lg p-6">
           <h1 className="font-display text-[clamp(28px,4vw,40px)]">Supabase belum dikonfigurasi</h1>
           {supabaseConfigIssue && (
@@ -474,7 +474,7 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="bg-brutal-grid flex min-h-screen items-center justify-center">
+      <div className="bg-brutal-grid flex min-h-dvh items-center justify-center pb-[env(safe-area-inset-bottom,0px)]">
         <p className="caption-brutal">Memuat sesi…</p>
       </div>
     )
@@ -489,7 +489,7 @@ export default function App() {
   }
 
   return (
-    <div className="bg-brutal-grid min-h-dvh pb-[env(safe-area-inset-bottom,0px)]">
+    <div className="bg-brutal-grid min-h-dvh pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
       <Header
         userName={profile?.name}
         userEmail={session.user.email}
@@ -502,7 +502,7 @@ export default function App() {
         onDeleteAccount={() => setDeleteAccountOpen(true)}
       />
 
-      <main className="page-shell space-y-4 py-4 sm:space-y-8 sm:py-8">
+      <main className="page-shell space-y-4 py-4 pb-8 sm:space-y-8 sm:py-8">
         <DashboardStats stats={stats} onFilterChange={setFilter} />
 
         <TonightPlan
