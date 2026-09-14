@@ -54,7 +54,11 @@ export function getStudySessionState(studyTime, now = new Date(), windowMinutes 
 }
 
 export function isSessionDismissedToday() {
-  return localStorage.getItem(SESSION_DISMISS_KEY) === todayKey()
+  try {
+    return localStorage.getItem(SESSION_DISMISS_KEY) === todayKey()
+  } catch {
+    return false
+  }
 }
 
 export function dismissStudySession() {
@@ -74,5 +78,9 @@ export function clearStudyflowLocalData() {
 }
 
 export function notificationSupported() {
-  return typeof window !== 'undefined' && 'Notification' in window
+  try {
+    return typeof window !== 'undefined' && typeof Notification === 'function'
+  } catch {
+    return false
+  }
 }

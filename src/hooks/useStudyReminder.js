@@ -54,16 +54,26 @@ function buildStudyBody(stats, tasks) {
 }
 
 function notify(title, body) {
-  if (!notificationSupported()) return false
-  if (Notification.permission !== 'granted') return false
-  new Notification(title, { body })
-  return true
+  if (currentPermission() !== 'granted') return false
+  try {
+    new Notification(title, { body })
+    return true
+  } catch {
+    return false
+  }
+}
+
+function currentPermission() {
+  if (!notificationSupported()) return 'unsupported'
+  try {
+    return Notification.permission
+  } catch {
+    return 'unsupported'
+  }
 }
 
 export function useStudyReminder(studyTime, stats, tasks = []) {
-  const [permission, setPermission] = useState(() =>
-    notificationSupported() ? Notification.permission : 'unsupported',
-  )
+  const [permission, setPermission] = useState(currentPermission)
   const [tick, setTick] = useState(0)
 
   const session = useMemo(
@@ -74,23 +84,25 @@ export function useStudyReminder(studyTime, stats, tasks = []) {
   const focusTask = useMemo(() => pickFocusTask(tasks), [tasks, tick])
 
   const refreshPermission = useCallback(() => {
-    if (!notificationSupported()) {
-      setPermission('unsupported')
-      return 'unsupported'
-    }
-    setPermission(Notification.permission)
-    return Notification.permission
+    const next = currentPermission()
+    setPermission(next)
+    return next
   }, [])
 
   const requestPermission = useCallback(async () => {
     if (!notificationSupported()) return 'unsupported'
-    if (Notification.permission === 'granted') {
-      setPermission('granted')
-      return 'granted'
+    try {
+      if (Notification.permission === 'granted') {
+        setPermission('granted')
+        return 'granted'
+      }
+      const next = await Notification.requestPermission()
+      setPermission(next)
+      return next
+    } catch {
+      setPermission('unsupported')
+      return 'unsupported'
     }
-    const next = await Notification.requestPermission()
-    setPermission(next)
-    return next
   }, [])
 
   const sendTest = useCallback(async () => {
@@ -105,15 +117,11 @@ export function useStudyReminder(studyTime, stats, tasks = []) {
   useEffect(() => {
     if (!notificationSupported()) return undefined
 
-    if (Notification.permission === 'default') {
-      Notification.requestPermission().then((next) => setPermission(next))
-    } else {
-      setPermission(Notification.permission)
-    }
+    setPermission(currentPermission())
 
     const check = () => {
       setTick((value) => value + 1)
-      if (Notification.permission !== 'granted') return
+      if (currentPermission() !== 'granted') return
 
       const now = new Date()
       const today = todayKey(now)
@@ -122,31 +130,35 @@ export function useStudyReminder(studyTime, stats, tasks = []) {
       const overdue = open.filter((task) => hoursUntilDeadline(task) < 0)
       const notStarted = open.filter((task) => (task.status || 'belum_mulai') === 'belum_mulai')
 
-      if (localStorage.getItem(LAST_URGENCY_KEY) !== today) {
-        if (emergency.length > 0 || overdue.length > 0) {
-          notify('StudyFlow — Ada tugas yang harus segera dikerjakan', [
-            overdue.length > 0 ? `${overdue.length} terlambat.` : '',
-            emergency.length > 0 ? `${emergency.length} darurat 48 jam.` : '',
-            notStarted.length > 0 ? `${notStarted.length} belum mulai.` : '',
-            summarizeTasks(overdue.length > 0 ? overdue : emergency),
-          ]
-            .filter(Boolean)
-            .join(' '))
-          localStorage.setItem(LAST_URGENCY_KEY, today)
+      try {
+        if (localStorage.getItem(LAST_URGENCY_KEY) !== today) {
+          if (emergency.length > 0 || overdue.length > 0) {
+            notify('StudyFlow — Ada tugas yang harus segera dikerjakan', [
+              overdue.length > 0 ? `${overdue.length} terlambat.` : '',
+              emergency.length > 0 ? `${emergency.length} darurat 48 jam.` : '',
+              notStarted.length > 0 ? `${notStarted.length} belum mulai.` : '',
+              summarizeTasks(overdue.length > 0 ? overdue : emergency),
+            ]
+              .filter(Boolean)
+              .join(' '))
+            localStorage.setItem(LAST_URGENCY_KEY, today)
+          }
         }
+
+        if (!studyTime) return
+        const phase = getStudySessionState(studyTime, now).phase
+        if (phase !== 'active' && phase !== 'missed') return
+        if (localStorage.getItem(LAST_STUDY_KEY) === today) return
+
+        const title =
+          phase === 'missed'
+            ? 'StudyFlow — Jam belajar sudah lewat'
+            : 'StudyFlow — Waktunya belajar!'
+        notify(title, buildStudyBody(stats, tasks))
+        localStorage.setItem(LAST_STUDY_KEY, today)
+      } catch {
+        /* Safari private mode / blocked storage */
       }
-
-      if (!studyTime) return
-      const phase = getStudySessionState(studyTime, now).phase
-      if (phase !== 'active' && phase !== 'missed') return
-      if (localStorage.getItem(LAST_STUDY_KEY) === today) return
-
-      const title =
-        phase === 'missed'
-          ? 'StudyFlow — Jam belajar sudah lewat'
-          : 'StudyFlow — Waktunya belajar!'
-      notify(title, buildStudyBody(stats, tasks))
-      localStorage.setItem(LAST_STUDY_KEY, today)
     }
 
     const interval = setInterval(check, CHECK_INTERVAL_MS)
