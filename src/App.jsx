@@ -489,7 +489,7 @@ export default function App() {
   }
 
   return (
-    <div className="bg-brutal-grid min-h-dvh pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]">
+    <div className="bg-brutal-grid min-h-dvh pb-[calc(4rem+var(--ios-home-inset,0px))]">
       <Header
         userName={profile?.name}
         userEmail={session.user.email}

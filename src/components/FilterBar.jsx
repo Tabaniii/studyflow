@@ -28,12 +28,12 @@ export default function FilterBar({ filter, onFilterChange, sort, onSortChange }
         ))}
       </div>
 
-      <label className="caption-brutal flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+      <label className="caption-brutal flex w-full min-w-0 flex-row flex-wrap items-center gap-2 pb-6 sm:pb-0">
         Urutkan:
         <select
           value={sort}
           onChange={(event) => onSortChange(event.target.value)}
-          className="input-brutal font-bold sm:!w-auto"
+          className="input-brutal min-w-0 flex-1 font-bold sm:!w-auto sm:flex-none"
         >
           <option value="deadline">Deadline terdekat</option>
           <option value="prioritas">Prioritas tertinggi</option>

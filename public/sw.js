@@ -1,4 +1,4 @@
-const CACHE = 'studyflow-shell-v3'
+const CACHE = 'studyflow-shell-v4'
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
