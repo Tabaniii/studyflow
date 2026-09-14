@@ -235,10 +235,6 @@ body {
   }
 }
 
-.insight-brutal {
-  animation: brutal-idle 4s steps(4, end) infinite;
-}
-
 @media (max-width: 639px) {
   .insight-brutal {
     animation: none;

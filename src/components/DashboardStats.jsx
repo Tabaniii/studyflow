@@ -8,16 +8,18 @@ const CARDS = [
 
 export default function DashboardStats({ stats, onFilterChange }) {
   return (
-    <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-      {CARDS.map((card) => (
+    <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+      {CARDS.map((card, index) => (
         <button
           key={card.key}
           type="button"
           onClick={() => onFilterChange?.(card.filter)}
-          className={`brutal-border brutal-shadow brutal-radius-md brutal-press min-w-0 p-3 text-left sm:p-4 ${card.fill}`}
+          className={`brutal-border brutal-shadow brutal-radius-md brutal-press min-w-0 p-3 text-left sm:p-4 ${card.fill} ${
+            index === CARDS.length - 1 ? 'col-span-2 sm:col-span-1' : ''
+          }`}
         >
-          <span className={`icon-tile mb-3 ${card.tile}`}>{card.mark}</span>
-          <p className="font-display text-[clamp(32px,5vw,48px)] leading-none">
+          <span className={`icon-tile mb-2 sm:mb-3 ${card.tile}`}>{card.mark}</span>
+          <p className="font-display text-[clamp(28px,5vw,48px)] leading-none">
             {stats[card.key] ?? 0}
           </p>
           <p className="caption-brutal mt-2">{card.label}</p>

@@ -489,7 +489,7 @@ export default function App() {
   }
 
   return (
-    <div className="bg-brutal-grid min-h-screen">
+    <div className="bg-brutal-grid min-h-dvh pb-[env(safe-area-inset-bottom,0px)]">
       <Header
         userName={profile?.name}
         userEmail={session.user.email}
@@ -502,7 +502,7 @@ export default function App() {
         onDeleteAccount={() => setDeleteAccountOpen(true)}
       />
 
-      <main className="page-shell space-y-8 py-8">
+      <main className="page-shell space-y-4 py-4 sm:space-y-8 sm:py-8">
         <DashboardStats stats={stats} onFilterChange={setFilter} />
 
         <TonightPlan
