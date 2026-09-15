@@ -31,7 +31,7 @@ export default function PasswordField({
         />
         <button
           type="button"
-          className="password-toggle"
+          className="password-toggle-eye"
           onClick={() => setVisible((prev) => !prev)}
           aria-label={visible ? 'Sembunyikan password' : 'Tampilkan password'}
           aria-pressed={visible}

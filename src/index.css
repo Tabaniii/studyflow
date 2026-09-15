@@ -232,6 +232,22 @@ body {
   padding-right: 52px;
 }
 
+.password-toggle-eye {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
 .password-toggle {
   position: absolute;
   right: 6px;
